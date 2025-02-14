@@ -32,7 +32,6 @@ dotenvy = { version = "0.15.7" }
 
 [dev-dependencies]
 tower = { version = "0.5.2" }
-# dotenvy = { version = "0.15.7" }
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(tarpaulin_include)'] }

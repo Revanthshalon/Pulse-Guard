@@ -1,6 +1,3 @@
-use config::AccessGridConfig;
-use db::DbService;
-use state::AppState;
 use tokio::net::TcpListener;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -14,7 +11,9 @@ mod repositories;
 mod routes;
 mod state;
 
+pub use self::config::AccessGridConfig;
 pub use self::routes::create_service_routes;
+pub use self::state::AppState;
 
 pub async fn run_access_grid_service() -> Result<(), Box<dyn std::error::Error>> {
     // Tracing Setup
@@ -29,12 +28,9 @@ pub async fn run_access_grid_service() -> Result<(), Box<dyn std::error::Error>>
 
     let ag_config = AccessGridConfig::load_config();
 
-    let db_config = DbService::init(ag_config.database())
-        .await
-        .expect("🔥 Error connecting to the Database");
-
     let app_state = AppState::builder()
-        .with_db_service(db_config.get_connection_pool())
+        .with_db_config(ag_config.database())
+        .await
         .build()?;
 
     let service_routes = create_service_routes(app_state);

@@ -1,7 +1,7 @@
 [env]
 AG_IP = "127.0.0.1"
 AG_PORT = "3000"
-AG_HOST = "localhost"
+AG_HOST = "production"
 AG_DATABASE_PORT = "5432"
 AG_USERNAME = "access_grid"
 AG_PASSWORD = "password"

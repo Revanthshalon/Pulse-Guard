@@ -29,8 +29,11 @@ pub struct AppStateBuilder {
 }
 
 impl AppStateBuilder {
-    pub fn with_db_service(mut self, pool: PgPool) -> Self {
-        self.db_service = Some(DbService::with_pool(pool));
+    pub async fn with_db_config(mut self, db_config: &DatabaseConfig) -> Self {
+        let db_service = DbService::init(db_config)
+            .await
+            .expect("Error establishing connection to the database");
+        self.db_service = Some(db_service);
         self
     }
 

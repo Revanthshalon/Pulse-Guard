@@ -4,6 +4,9 @@ mod database;
 mod environment;
 mod server;
 
+use core::panic;
+use std::env;
+
 use environment::Environment;
 use tracing::info;
 
@@ -26,11 +29,17 @@ impl AccessGridConfig {
         match Environment::get_env() {
             Environment::Test => {
                 info!("Loading test configuration");
-                dotenvy::from_filename(".env.test").ok();
+                let res = dotenvy::from_filename_override(".env.test");
+                if let Err(e) = res {
+                    panic!("Error Loading Config File: {e}");
+                }
             }
             Environment::Development => {
                 info!("Loading development configuration");
-                dotenvy::from_filename(".env").ok();
+                let res = dotenvy::from_filename_override(".env");
+                if let Err(e) = res {
+                    panic!("Error Loading Config File: {e}");
+                }
             }
             Environment::Production => {
                 info!("Loading production configuration");
@@ -62,20 +71,20 @@ mod tests {
         net::{IpAddr, Ipv4Addr},
     };
 
+    use figment::Figment;
+
     use super::*;
 
     #[test]
     fn test_load_config_development() {
-        env::set_current_dir("../");
-
         let ag_config = AccessGridConfig::load_config();
 
         let config = AccessGridConfig {
             server: ServerConfig::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 3000),
             database: DatabaseConfig::new(
                 "localhost",
-                5432,
-                "access_grid",
+                5433,
+                "development",
                 "password",
                 "access_grid",
                 100,
@@ -89,22 +98,13 @@ mod tests {
 
     #[test]
     fn test_load_config_test() {
-        env::set_current_dir("../");
         env::set_var("AG_ENVIRONMENT", "test");
 
         let ag_config = AccessGridConfig::load_config();
 
         let config = AccessGridConfig {
             server: ServerConfig::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 3000),
-            database: DatabaseConfig::new(
-                "localhost",
-                5432,
-                "access_grid",
-                "password",
-                "access_grid",
-                100,
-                30,
-            ),
+            database: DatabaseConfig::new("localhost", 5433, "test", "password", "test", 1, 5),
         };
 
         assert_eq!(config.server(), ag_config.server());
@@ -113,7 +113,6 @@ mod tests {
 
     #[test]
     fn test_load_config_prod() {
-        env::set_current_dir("../");
         env::set_var("AG_ENVIRONMENT", "prod");
 
         let ag_config = AccessGridConfig::load_config();
@@ -121,7 +120,7 @@ mod tests {
         let config = AccessGridConfig {
             server: ServerConfig::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 3000),
             database: DatabaseConfig::new(
-                "localhost",
+                "production",
                 5432,
                 "access_grid",
                 "password",

@@ -38,9 +38,9 @@ services:
     ports:
       - "5433:5432"
     environment:
-      POSTGRES_USER: appuser
-      POSTGRES_PASSWORD: apppassword
-      POSTGRES_DB: pulse-guard
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: test
     volumes:
       - postgres-app-data:/var/lib/postgresql/data
     networks:
