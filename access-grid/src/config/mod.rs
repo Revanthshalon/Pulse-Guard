@@ -71,8 +71,6 @@ mod tests {
         net::{IpAddr, Ipv4Addr},
     };
 
-    use figment::Figment;
-
     use super::*;
 
     #[test]
