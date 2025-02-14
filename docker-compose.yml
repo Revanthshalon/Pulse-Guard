@@ -1,0 +1,61 @@
+services:
+  postgres-keycloak:
+    image: postgres:17.2
+    container_name: postgres-keycloak-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres-keycloak-data:/var/lib/postgresql/data
+    networks:
+      - keycloak-app-network
+
+  keycloak:
+    image: keycloak/keycloak:26.1.2
+    container_name: keycloak-service
+    depends_on:
+      - postgres-keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres-keycloak:5432/keycloak
+      KC_DB_USER: keycloak
+      KC_DB_PASSWORD: password
+      KC_HTTP_ENABLED: "true"
+    command: [ "start-dev" ]
+    ports:
+      - "8080:8080"
+    networks:
+      - keycloak-app-network
+
+  postgres-app:
+    image: postgres:17.2
+    container_name: postgres-app-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: apppassword
+      POSTGRES_DB: pulse-guard
+    volumes:
+      - postgres-app-data:/var/lib/postgresql/data
+    networks:
+      - keycloak-app-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-U", "appuser", "-d", "pulse-guard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  postgres-keycloak-data:
+  postgres-app-data:
+
+networks:
+  keycloak-app-network:
+    driver: bridge

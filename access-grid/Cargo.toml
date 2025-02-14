@@ -1,0 +1,38 @@
+[package]
+name = "access-grid"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "src/lib.rs"
+doctest = false
+
+[[bin]]
+name = "access-grid"
+path = "src/main.rs"
+
+[[test]]
+name = "integration"
+path = "tests/integration.rs"
+
+[dependencies]
+axum = { workspace = true }
+tokio = { workspace = true, default-features = false, features = ["macros", "rt-multi-thread"]}
+sqlx = { workspace = true, default-features = false, features = ["macros", "migrate", "runtime-tokio", "postgres", "uuid", "chrono"]}
+serde = { workspace = true, features = ["derive"]}
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter", "fmt", "json"]}
+tower-http = { workspace = true, features = ["cors"]}
+uuid = { workspace = true, features = ["v4", "serde"]}
+chrono = { workspace = true, features = ["serde"]}
+reqwest = { workspace = true, features = ["json"]}
+openidconnect = { workspace = true }
+dotenvy = { version = "0.15.7" }
+
+[dev-dependencies]
+tower = { version = "0.5.2" }
+# dotenvy = { version = "0.15.7" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(tarpaulin_include)'] }
